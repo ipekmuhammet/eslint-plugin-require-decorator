@@ -1,0 +1,31 @@
+{
+	"author": "Muhammet Ipek",
+	"bugs": {
+		"url": "https://github.com/ipekmuhammet/eslint-plugin-require-decorator/issues"
+	},
+	"license": "MIT",
+	"name": "eslint-plugin-require-decorator",
+	"description": "This is a custom plugin for eslint which enforces the use of decorators on methods.",
+	"homepage": "https://github.com/ipekmuhammet/eslint-plugin-require-decorator#readme",
+	"keywords": [
+		"eslint",
+		"eslintplugin",
+		"decorator",
+		"typescript"
+	],
+	"version": "0.0.1",
+	"main": "src/index.js",
+	"devDependencies": {
+		"@typescript-eslint/eslint-plugin": "^2.20.0",
+		"@typescript-eslint/parser": "^2.20.0",
+		"eslint": "^6.8.0",
+		"typescript": "^3.8.2"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ipekmuhammet/eslint-plugin-require-decorator.git"
+	},
+	"scripts": {
+		"test": "node src/tests.js"
+	}
+}
