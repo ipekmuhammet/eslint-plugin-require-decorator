@@ -5,6 +5,7 @@
 ```bash
 $ npm install --save-dev eslint-plugin-require-decorator
 ```
+
 or
 
 ```bash
@@ -20,19 +21,27 @@ $ yarn add -D eslint-plugin-require-decorator
   "rules": {
     "require-decorator/require-decorator": [
       1,
-			{
-				"classDecorators": [
-					"Controller"
-				],
-				"methodDecorators": [
-					"ApiOperation",
-					"ApiResponse",
-					{
-						"oneOfThem": ["Get", "Post", "Put", "Delete", "Patch", "Options", "Head", "All"]
-					}
-				]
-			},
-      { // You can define multiple options
+      {
+        "classDecorators": ["Controller"],
+        "methodDecorators": [
+          "ApiOperation",
+          "ApiResponse",
+          {
+            "oneOfThem": [
+              "Get",
+              "Post",
+              "Put",
+              "Delete",
+              "Patch",
+              "Options",
+              "Head",
+              "All"
+            ]
+          }
+        ]
+      },
+      {
+        // You can define multiple options
         "classDecorators": ["Service"],
         "methodDecorators": ["ServiceDecorator"]
       }
@@ -45,46 +54,40 @@ $ yarn add -D eslint-plugin-require-decorator
 // any.controller.ts
 @Controller("users")
 class UserController {
-	test!: number;
+  test!: number;
 
-	constructor(test: number) {
-		this.test = test;
-	}
+  constructor(test: number) {
+    this.test = test;
+  }
 
-	@ApiOperation()
+  @ApiOperation()
   @Get()
   // Missing decorators; ApiResponse
-	private getUserById(
-		userId: number
-	): void {
-		return;
-	}
+  private getUserById(userId: number): void {
+    return;
+  }
 
-	@ApiOperation()
+  @ApiOperation()
   @ApiResponse()
   // Require one of them; Get || Post || Put || Delete || Patch || Options || Head || All
-	deleteUserById(
-		userId: number
-	): void {
-		return;
-	}
+  deleteUserById(userId: number): void {
+    return;
+  }
 
   @Put()
   // Missing decorators; ApiOperation, ApiResponse
-	async updateUserById(
-		userId: number
-	): void {
-		return;
-	}
+  async updateUserById(userId: number): void {
+    return;
+  }
 }
 ```
 
 ## Features
 
-|                                 |  Completed  |
-| ------------------------------- | :---------: |
-| One of them                     |     ✔️     |
-| Validate fields                 |     ❌     |
-| Validate async                  |     ❌     |
-| Validate access modifiers       |     ❌     |
-| Fix (push required decorators)  |     ✔️     |
+|                                | Completed |
+| ------------------------------ | :-------: |
+| One of them                    |    ✔️     |
+| Validate fields                |    ❌     |
+| Validate async                 |    ❌     |
+| Validate access modifiers      |    ❌     |
+| Fix (push required decorators) |    ✔️     |
