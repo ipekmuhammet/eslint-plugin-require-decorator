@@ -13,13 +13,15 @@
 		"decorator",
 		"typescript"
 	],
-	"version": "0.0.2",
+	"version": "0.1.1",
 	"main": "src/index.js",
-	"devDependencies": {
+	"peerDependencies": {
 		"@typescript-eslint/eslint-plugin": "^2.20.0",
-		"@typescript-eslint/parser": "^2.20.0",
-		"eslint": "^6.8.0",
-		"typescript": "^3.8.2"
+		"@typescript-eslint/parser": "^2.20.0"
+	},
+	"devDependencies": {
+		"typescript": "^3.8.2",
+		"eslint": "^6.8.0"
 	},
 	"repository": {
 		"type": "git",

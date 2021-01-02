@@ -1,17 +1,17 @@
-const { RuleTester } = require('@typescript-eslint/experimental-utils/dist/ts-eslint/RuleTester');
-const { rules } = require("./index");
+const { RuleTester } = require("@typescript-eslint/experimental-utils/dist/ts-eslint/RuleTester")
+const { rules } = require("./index")
 
 const ruleTester = new RuleTester({
 	parserOptions: {
 		ecmaVersion: 6,
-		sourceType: 'module',
+		sourceType: "module",
 		ecmaFeatures: {},
 	},
-	parser: require.resolve('@typescript-eslint/parser'),
-});
+	parser: require.resolve("@typescript-eslint/parser"),
+})
 
-const code = `
-@Controller('users')
+const validTest = `
+@Controller("users")
 class UserController {
 	test!: number;
 
@@ -20,6 +20,42 @@ class UserController {
 	}
 
 	@ApiOperation()
+	@Get()
+	private getUserById(
+		userId: number
+	): void {
+		return;
+	}
+
+	@ApiOperation()
+	@ApiResponse()
+	@Delete()
+	deleteUserById(
+		userId: number
+	): void {
+		return;
+	}
+
+	@Put()
+	async updateUserById(
+		userId: number
+	): void {
+		return;
+	}
+}
+`
+
+const invalidTest = `
+@Controller("users")
+class UserController {
+	test!: number;
+
+	constructor(test: number) {
+		this.test = test;
+	}
+
+	@ApiOperation()
+	@Get()
 	private getUserById(
 		userId: number
 	): void {
@@ -34,27 +70,8 @@ class UserController {
 		return;
 	}
 
+	@Put()
 	async updateUserById(
-		userId: number
-	): void {
-		return;
-	}
-}
-
-@Test('test')
-class TestSrvc {
-	test!: number;
-
-	@TestDecorator()
-	testMethod(
-		userId: number
-	): void {
-		return;
-	}
-
-	@TestDecorator()
-	@TestDecorator2()
-	testMethod2(
 		userId: number
 	): void {
 		return;
@@ -62,30 +79,24 @@ class TestSrvc {
 }
 `
 
-ruleTester.run('require-decorator', rules["require-decorator"], {
+ruleTester.run("require-decorator", rules["require-decorator"], {
 	valid: [
-
+		{code: validTest}
 	],
 	invalid: [
 		{
-			code,
+			code: invalidTest,
 			options: [
 				{
 					classDecorators: [
-						'Controller'
+						"Controller"
 					],
 					methodDecorators: [
-						'ApiOperation',
-						'ApiResponse'
-					]
-				},
-				{
-					classDecorators: [
-						'Test'
-					],
-					methodDecorators: [
-						'TestDecorator',
-						'TestDecorator2'
+						"ApiOperation",
+						"ApiResponse",
+						{
+							oneOfThem: ["Get", "Post", "Put", "Delete", "Patch", "Options", "Head", "All"]
+						}
 					]
 				}
 			],
@@ -100,18 +111,18 @@ ruleTester.run('require-decorator', rules["require-decorator"], {
 				{
 					messageId: "method",
 					data: {
-						method: "updateUserById",
-						missingDecorators: "ApiOperation, ApiResponse"
+						method: "deleteUserById",
+						missingDecorators: "Get || Post || Put || Delete || Patch || Options || Head || All"
 					}
 				},
 				{
 					messageId: "method",
 					data: {
-						method: "testMethod",
-						missingDecorators: "TestDecorator2"
+						method: "updateUserById",
+						missingDecorators: "ApiOperation, ApiResponse"
 					}
 				}
-			],
+			]
 		}
 	]
-});
+})

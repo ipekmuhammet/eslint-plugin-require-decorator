@@ -1,41 +1,45 @@
-const getDecoratorName = decorator => decorator
-	&& decorator.expression
-	&& (decorator.expression.callee
-		&& decorator.expression.callee.name
-		|| decorator.expression.name)
+const getDecoratorName = decorator => decorator?.expression?.callee?.name ?? decorator.expression.name
 
-const getMissingDecorators = (currentDecorators = [], requiredDecoratorNames = []) => {
-	const currentDecoratorNames = currentDecorators.map((decorator) => getDecoratorName(decorator))
+const getMissingDecorators = (currentDecorators = [], requiredDecorators = []) => {
+	const currentDecoratorNames = currentDecorators.map(getDecoratorName)
 
-	return requiredDecoratorNames.filter((decorator) => {
-		return !currentDecoratorNames.includes(decorator)
+	return requiredDecorators.filter(requiredDecorator => {
+		if (requiredDecorator.oneOfThem && Array.isArray(requiredDecorator.oneOfThem)) {
+			return !requiredDecorator.oneOfThem.some((oneOfRequiredDecorator) => currentDecoratorNames.includes(oneOfRequiredDecorator))
+		}
+
+		return !currentDecoratorNames.includes(requiredDecorator)
 	})
 }
 
-const isClassValid = (classDecarators = [], requiredDecoratorNames = []) => {
-	const classDecaratorNames = classDecarators.map((decorator) => getDecoratorName(decorator))
+const isClassValid = (classDecarators = [], requiredDecorators = []) => {
+	const classDecaratorNames = classDecarators.map(getDecoratorName)
 
-	return requiredDecoratorNames.every((decorator) => {
-		return classDecaratorNames.includes(decorator)
-	})
+	return requiredDecorators.every(requiredDecorator => classDecaratorNames.includes(requiredDecorator))
 }
 
 const isConstructor = (node) => {
-	if(node.key.name === 'constructor'){
-		return true;
-	}
+	return node.key.name === "constructor"
+}
 
-	return false;
+const logMissingDecorators = (missingDecorators) => {
+	return missingDecorators.map((decorator) => {
+		if (decorator.oneOfThem && Array.isArray(decorator.oneOfThem)) {
+			return decorator.oneOfThem.join(" || ")
+		}
+	
+		return decorator
+	}).join(", ")
 }
 
 const createMapping = (node, option) => {
 	const missingDecorators = getMissingDecorators(node.decorators, option.methodDecorators)
 	const clss = node.parent.parent
 
-	if(
-		missingDecorators.length === 0 
-		|| isConstructor(node) 
-		|| !isClassValid(clss.decorators, option.classDecorators)){
+	if (
+		missingDecorators.length === 0
+		|| isConstructor(node)
+		|| !isClassValid(clss.decorators, option.classDecorators)) {
 		return {
 			missingDecorators: []
 		}
@@ -45,9 +49,19 @@ const createMapping = (node, option) => {
 		missingDecorators,
 		mapping: {
 			method: node.key.name,
-			missingDecorators: missingDecorators.join(', ')
+			missingDecorators: logMissingDecorators(missingDecorators)
 		}
 	}
+}
+
+const fixerFn = (missingDecorators) => {
+	return missingDecorators.map(decorator => {
+		if (decorator.oneOfThem && Array.isArray(decorator.oneOfThem)) {
+			return "" // decorator.oneOfThem.map(oneOfDecorator => `@${oneOfDecorator}() \r\n `).join("") // TODO fix others and in oneOfThem suggest oneOfThem :)
+		}
+
+		return `@${decorator}() \r\n `
+	}).join("")
 }
 
 module.exports.rules = {
@@ -69,16 +83,16 @@ module.exports.rules = {
 				MethodDefinition(node) {
 					const options = context.options || []
 
-					options.map((option) => {
+					options.map(option => {
 						const { missingDecorators, mapping } = createMapping(node, option)
 
-						if(missingDecorators.length > 0){
+						if (missingDecorators.length > 0) {
 							context.report({
 								node,
 								messageId: "method",
 								data: mapping,
-								fix: function(fixer) {
-									return fixer.insertTextBefore(node, missingDecorators.map((decorator) => `@${decorator}() \r\n `).join(''));
+								fix: function (fixer) {
+									return fixer.insertTextBefore(node, fixerFn(missingDecorators))
 								}
 							})
 						}
